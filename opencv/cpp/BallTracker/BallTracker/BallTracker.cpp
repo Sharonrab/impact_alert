@@ -21,6 +21,7 @@ BallTracker::BallTracker(int deviceNum, bool debug, bool debugVerbose, bool trac
 	interfaceIsInitialized = false;
 	videoIsPaused = false;
 	foundBall = false;
+	foundBallAgain = false;
 	ballCenter = cv::Point2i(0,0);
 	ballRadius = 0;
     this->deviceNum = deviceNum;
@@ -32,7 +33,11 @@ BallTracker::BallTracker(int deviceNum, bool debug, bool debugVerbose, bool trac
     captureType = CaptureType::camera;
     this->debug = debug;
     this->debugVerbose = debugVerbose;
+	//s.r.
 
+	ballVelocity = 0;
+	ballVerticalAngle = 0;
+	ballHorizontalAngle = 0;
     // Open the capture
     cap = cv::VideoCapture(this->deviceNum);
     if (!cap.isOpened())
@@ -64,10 +69,12 @@ BallTracker::BallTracker(int deviceNum, bool debug, bool debugVerbose, bool trac
 BallTracker::BallTracker(std::string fileName, bool debug, bool debugVerbose, bool trackBall,
     bool startVideoPaused, TrackingParameters *trackingParameters) {
 	isRunning = false;
-	frameNumber = 0;
+	frameNumber = 1;
+	frameNumberPrevTrack = -1;//s.r.
 	interfaceIsInitialized = false;
 	videoIsPaused = false;
 	foundBall = false;
+	foundBallAgain = false;
     this->fileName = fileName;
     trackingEnabled = trackBall;
     videoIsPaused = startVideoPaused;
@@ -76,7 +83,11 @@ BallTracker::BallTracker(std::string fileName, bool debug, bool debugVerbose, bo
     captureType = CaptureType::video;
     this->debug = debug;
     this->debugVerbose = debugVerbose;
+	//s.r.
 
+	ballVelocity = 0;
+	ballVerticalAngle = 0;
+	ballHorizontalAngle = 0;
     // Check if we have an image file using the file extension
     std::string fileNameExt = fileName.substr(fileName.find_last_of(".") + 1);
     if (std::find(imageFileExtensionList.begin(), imageFileExtensionList.end(),
@@ -85,9 +96,22 @@ BallTracker::BallTracker(std::string fileName, bool debug, bool debugVerbose, bo
     }
 
     // Open the capture
-    cap = cv::VideoCapture(this->fileName);
+    
+	cap.open(fileName);
+	
     if (!cap.isOpened())
 		throw std::runtime_error("Failed to capture from file");
+	//initial Dynamics object
+	
+	double initialSpeed = 10;
+	double initialHeight = 1;
+	double angle = 30;
+	
+	BallDynamics = new Dynamics(initialSpeed,initialHeight,angle);
+	/*BallDynamics->runSimulation();///couple of tests
+	BallDynamics->runSimulation();
+	BallDynamics->Init(initialSpeed,initialHeight,angle);
+	BallDynamics->runSimulation();*/
 
     // Get capture properties
     captureProperties["width"] = (float)cap.get(cv::CAP_PROP_FRAME_WIDTH);
@@ -148,6 +172,7 @@ void BallTracker::run() {
 	if (! interfaceIsInitialized)
 		initializeInterface();
 
+	frameNumber = 1;
 	bool isRunning = true;
 	bool wantNextFrame = true; // want a new frame
 	bool haveNewFrame = false; // new frame read
@@ -189,6 +214,21 @@ void BallTracker::run() {
 
 			if (foundBall) {
 				drawBall(&frameBall,ballCenter,ballRadius);
+				//s.r.
+				if( foundBall && (frameNumber-frameNumberPrevTrack)<2)//check time history between tracks
+				{
+					BallDynamics->EstimateVelocityComponents(ballCenter, ballCenterPrevTrack,ballRadius, ballRadiusPrevTrack, ballVelocity, ballVerticalAngle ,ballHorizontalAngle);
+					BallDynamics->Init(ballVelocity,ballCenter.y,ballVerticalAngle);
+					BallDynamics->runSimulation();
+					
+					drawPredictedTrajectory(BallDynamics->height,BallDynamics->distance, ballCenter.x,ballCenter.y,frameBall);
+				}
+				else
+				{
+					frameNumberPrevTrack = frameNumber;
+					ballCenterPrevTrack = ballCenter;
+					ballRadiusPrevTrack = ballRadius;
+				}
 			}
 		}
 
@@ -237,9 +277,9 @@ void BallTracker::run() {
 		// Video advancing and looping
 		if (isUsingVideo() && !videoIsPaused)
 			wantNextFrame = true;
-		if (isUsingVideo() && wantNextFrame)
+		if (! isUsingImage() && wantNextFrame)
 			frameNumber++;
-		if (frameNumber >= (int)captureProperties["frameCount"]) {
+		if (isUsingVideo() && frameNumber >= (int)captureProperties["frameCount"] - 1) {
 			frameNumber = 1;
 			cap.release();
 			cap = cv::VideoCapture(fileName);
@@ -380,6 +420,24 @@ void BallTracker::drawBall(cv::Mat *frame, cv::Point2i center, int outerRadius, 
 	sprintf(buf,"(x: %u, y:%u), %u px",center.x, center.y, outerRadius);
 	cv::putText(*frame, std::string(buf), cv::Point(center.x + outerRadius, center.y + outerRadius),
 		cv::FONT_HERSHEY_PLAIN, textScale, crosshairColor, textThickness);
+}
+
+
+
+ void BallTracker::drawPredictedTrajectory(std::vector<double> distance,std::vector<double> height, int x, int y, Mat &frame)
+{
+
+	//cv::Mat imageToDraw; //this is your image to draw, don't forget to load it
+	//std::vector<cv::Point> pointsInLast20Frames; //fill this vector with points, they should be ordered
+	cv::Scalar color(0, 0, 255); //red
+	int sz = distance.size() - 1;
+	for (int i = 0; i < sz; ++i)
+	{
+		cv::line(frame, Point(x+distance[i], 480-height[i]), Point(x+distance[i+1], 480-height[i+1]), color);
+	}
+
+	//cv::line(frame, Point(x1, y1),Point(x2, y2), color);
+
 }
 
 /*----------------------- Non-member Functions ------------------------*/

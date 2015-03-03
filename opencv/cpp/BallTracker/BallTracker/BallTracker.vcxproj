@@ -32,11 +32,9 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="C:\Users\dagoodma\Documents\Visual Studio 2010\Properties\OpenCV_Debug.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="C:\Users\dagoodma\Documents\Visual Studio 2010\Properties\OpenCV.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -52,10 +50,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opencv_calib3d300d.lib;opencv_core300d.lib;opencv_features2d300d.lib;opencv_flann300d.lib;opencv_highgui300d.lib;opencv_imgcodecs300d.lib;opencv_imgproc300d.lib;opencv_ml300d.lib;opencv_objdetect300d.lib;opencv_photo300d.lib;opencv_shape300d.lib;opencv_stitching300d.lib;opencv_superres300d.lib;opencv_ts300d.lib;opencv_video300d.lib;opencv_videoio300d.lib;opencv_videostab300d.lib;libpngd.lib;libtiffd.lib;zlibd.lib;libjasper.lib;libjpegd.lib;ippicvmt.lib;IlmImfd.lib;libwebpd.lib;comctl32.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OPENCV_DIR)\build\x86\vc10\staticlib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -77,12 +81,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BallTracker.cpp" />
+    <ClCompile Include="Dynamics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TrackingParameters.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BallTracker.hpp" />
+    <ClInclude Include="Dynamics.h" />
     <ClInclude Include="TrackingParameters.hpp" />
     <ClInclude Include="Utility.hpp" />
   </ItemGroup>

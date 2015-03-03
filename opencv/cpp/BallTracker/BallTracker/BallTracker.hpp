@@ -11,6 +11,7 @@
 
 // Include local libraries
 #include "TrackingParameters.hpp"
+#include "Dynamics.h"
 
 // Default camera width and height
 #define DEFAULT_CAM_WIDTH   640
@@ -131,6 +132,8 @@ class BallTracker {
             const cv::Scalar& outerColor=cv::Scalar(0,0,255),
 			const cv::Scalar& crosshairColor=cv::Scalar(255,160,160));
         cv::Mat *thresholdFrame(cv::Mat *frame);
+		
+		void drawPredictedTrajectory(std::vector<double> distance,std::vector<double> height, int x, int y, Mat &frame);
 		/**
 			Filters source and saves the result into the destination matrix.
 
@@ -166,12 +169,17 @@ class BallTracker {
         bool trackingEnabled;
         bool isRunning;
 		bool foundBall;
+		//s.r.
+		bool foundBallAgain;// needed for creating vector direction
 		cv::Point2i ballCenter;
+		cv::Point2i ballCenterPrevTrack;//s.r.
 		int ballRadius;
+		int ballRadiusPrevTrack;//s.r.
         bool interfaceIsInitialized;
         bool videoIsPaused;
         int deviceNum;
 		unsigned int frameNumber;
+		unsigned int frameNumberPrevTrack;//s.r.
         std::string fileName;
         cv::VideoCapture cap;
         CaptureType::Enum captureType;
@@ -181,6 +189,10 @@ class BallTracker {
 		cv::Ptr<cv::BackgroundSubtractor> backgroundSubtractor;
 		cv::Mat backgroundMask;
 #endif
+		Dynamics * BallDynamics;
+		double ballVelocity;
+		double ballVerticalAngle;
+		double ballHorizontalAngle;
 };
 
 #endif

@@ -16,10 +16,13 @@ int main (int argn, char* args[]) {
     std::string fileOrDevice = args[1];
 	BallTracker *tracker;
 	try {
+		TrackingParameters *trackingParameters=new TrackingParameters();
 		if (utility::isNumber(fileOrDevice)) 
-			tracker = new BallTracker(std::stoi(fileOrDevice), true, true);
+			//tracker = new BallTracker(/*std::stoi(fileOrDevice), true, true*/);
+			int i;
 		else
 			tracker = new BallTracker(fileOrDevice, true, true);
+			//tracker = new BallTracker(fileOrDevice, true, true,true, false,trackingParameters);
 
 		tracker->run();
 	}
