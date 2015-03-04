@@ -424,7 +424,7 @@ void BallTracker::drawBall(cv::Mat *frame, cv::Point2i center, int outerRadius, 
 
 
 
- void BallTracker::drawPredictedTrajectory(std::vector<double> distance,std::vector<double> height, int x, int y, Mat &frame)
+ void BallTracker::drawPredictedTrajectory(std::vector<double> height ,std::vector<double> distance, int x, int y, Mat &frame)
 {
 
 	//cv::Mat imageToDraw; //this is your image to draw, don't forget to load it
@@ -433,7 +433,8 @@ void BallTracker::drawBall(cv::Mat *frame, cv::Point2i center, int outerRadius, 
 	int sz = distance.size() - 1;
 	for (int i = 0; i < sz; ++i)
 	{
-		cv::line(frame, Point(x+distance[i], 480-height[i]), Point(x+distance[i+1], 480-height[i+1]), color);
+		if (y-height[i+1])
+			cv::line(frame, Point(x+distance[i], y+abs(y-height[i])), Point(x+distance[i+1], y+abs(y-height[i+1])), color);
 	}
 
 	//cv::line(frame, Point(x1, y1),Point(x2, y2), color);

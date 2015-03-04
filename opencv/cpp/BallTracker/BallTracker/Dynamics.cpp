@@ -172,7 +172,7 @@ void Dynamics::runSimulation()
 
 		timeInterval++;
 		
-	} while (idealHeight[timeInterval - 1] > 0);
+	} while (idealHeight[timeInterval - 1] > idealHeight[0]);
 
 	timeInterval = 1;
 
@@ -194,7 +194,7 @@ void Dynamics::runSimulation()
 
 			timeInterval++;
 
-		} while (height[timeInterval - 1] > 0);
+		} while (height[timeInterval - 1] > height[0]);
 
 	}
 
