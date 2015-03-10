@@ -8,7 +8,15 @@
 // Include OpenCV libraries
 // TODO
 #include <opencv2/core.hpp>
+#define M_PI       3.14159265358979323846
 
+#define RAD2DEG 180.0/M_PI
+#define DEG2RAD M_PI/180.0
+
+#define FOCAL_LENGTH 1600.0f
+#define FORESHORTENING_GAIN 2.0f //meter * pixel
+#define FORESHORTENING_DECAY 20.0f // pixel
+#define FRAME_RATE 0.033f
 #pragma once
 using namespace std;
 using namespace cv;
@@ -22,9 +30,13 @@ public:
 	void calculateCurrentSpeeds();
 	void calculateAirResistance();
 	bool onlyCalculateIdealPath();
-	void Init(double initialSpeed, double initialHeight, double angle);
-	void EstimateVelocityComponents(cv::Point2i currentPnt, cv::Point2i prevPnt,int currentBallRadius, int prevBallRadius, double &V, double &verticalAngle ,double &horizontalAngle);
+	void Init(double initialSpeed, double initialHeight, double angle, int BallRadius);
+	void EstimateVelocityComponents(cv::Point2i currentPnt, cv::Point2i prevPnt,int currentBallRadius, int prevBallRadius, double &V, double &verticalAngle ,double &horizontalAngle,unsigned int diffBetweenTracks);
+	double EstimateDistance(int BallRadius);
+	double EstimateCameraCoord(int pixel, double pz);
+	int EstimateImageCoord(double p,double pz);
 
+	void Dynamics::SetIdealPath();
 	//------------------------VARIABLES-------------------------------
 private:
 	//GRAVITY
@@ -35,6 +47,8 @@ private:
 	double dragCoefficient;
 	//ANGLE
 	double angle; // Angle throw in degrees
+	double m_verticalAngle;
+	
 	//AREA
 	double area; // Cross sectional area of object
 	//SPEED
@@ -43,12 +57,20 @@ private:
 	double currentVerticalSpeed; // y component of object
 	double currentAirSpeed; // actual speed of object
 	//POSITION
-	double initialHeight;
+	double initialHeight_pixels;// in pixels
+	double m_initialHeight;//in meters
 public:
+	double m_horizontalAngle;
+
 	std::vector<double> height;
 	std::vector<double> distance;
+	std::vector<double> z;
+	std::vector<double> x;
+
 	std::vector<double> idealHeight;
 	std::vector<double> idealDistance;
+	std::vector<double> idealZ;
+	std::vector<double> idealX;
 
 	//MASS
 	double mass;

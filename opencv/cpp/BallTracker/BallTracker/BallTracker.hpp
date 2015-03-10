@@ -17,10 +17,12 @@
 #define DEFAULT_CAM_WIDTH   640
 #define DEFAULT_CAM_HEIGHT  480
 
-// Filter methods
+// Filter methods (moved to parameter struct)
 #define USE_BACKGROUND_FILTER // Gaussian filter
 #define USE_HSV_FILTER	  // HSV range filter
+#define USE_MORPH_FILTER	// morphology (erosion and dilation) filter
 #define USE_BLUR_FILTER	      // Gaussian blur
+#define USE_HOUGH_DETECTION // uses HoughCircle detection, or contour detection if not
 
 /**
 	Slider callback data contains a pointer to the TrackingParameters instance,
@@ -124,16 +126,14 @@ class BallTracker {
 				'p' - Prints current tracking parameters to the console.
 		*/
         void run();
-    private:
+		void BallTracker::drawPredictedTrajectory(std::vector<cv::Point3d> points, int x, int y, Mat &frame);
+private:
         // Methods
         void initializeInterface();
-        void drawBall(cv::Mat *frame, cv::Point2i center, int outerRadius,
+        void drawBall(cv::Mat &frame, cv::Point2i center, int outerRadius,
             int innerRadius=3, const cv::Scalar& innerColor=cv::Scalar(0,255,0),
             const cv::Scalar& outerColor=cv::Scalar(0,0,255),
 			const cv::Scalar& crosshairColor=cv::Scalar(255,160,160));
-        cv::Mat *thresholdFrame(cv::Mat *frame);
-		
-		void drawPredictedTrajectory(std::vector<double> distance,std::vector<double> height, int x, int y, Mat &frame);
 		/**
 			Filters source and saves the result into the destination matrix.
 
@@ -144,7 +144,7 @@ class BallTracker {
 			@param src	Source frame to filter.
 			@param dst	Destination frame to save filtered result into.
 		*/
-		void filterFrame(cv::Mat *src, cv::Mat *dst);
+		void filterFrame(cv::Mat &src, cv::Mat &dst);
 		/**
 			Detects the ball using Hough Circles.
 			@param frame	Frame to look for ball in.
@@ -152,7 +152,7 @@ class BallTracker {
 			@param radius	Pointer to save radius of detected ball.
 			@return true if ball was detected.
 		*/
-        bool detectBall(cv::Mat *frame, cv::Point2i *center, int *radius);
+        bool detectBall(cv::Mat &frame, cv::Point2i &center, int &radius);
 		/**
 			Wrapper for cv::createTrackbar using the _sliderCallbackData structure.
 			@param parameterName Slider name and TrackingParameters name
@@ -189,10 +189,22 @@ class BallTracker {
 		cv::Ptr<cv::BackgroundSubtractor> backgroundSubtractor;
 		cv::Mat backgroundMask;
 #endif
+		void BallTracker::SetIntrinsicMatrix();
+		std::vector<cv::Point3d> BallTracker::Generate3DPoints();
+
+
 		Dynamics * BallDynamics;
 		double ballVelocity;
 		double ballVerticalAngle;
 		double ballHorizontalAngle;
+		int diffBetweenTracks;
+		cv::Mat intrisicMat; // Intrisic matrix - (3, 3, cv::DataType<double>::type)
+		cv::Mat invert_intrisicMat; // Intrisic matrix - (3, 3, cv::DataType<double>::type)
+		cv::Mat rVec; // Rotation vector - (3, 1, cv::DataType<double>::type)
+		cv::Mat tVec; // Translation vector - (3, 1, cv::DataType<double>::type)
+		cv::Mat distCoeffs;   // Distortion vector - (5, 1, cv::DataType<double>::type)
+
+
 };
 
 #endif
