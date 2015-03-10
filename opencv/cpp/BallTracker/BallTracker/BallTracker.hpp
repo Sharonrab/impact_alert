@@ -11,17 +11,29 @@
 
 // Include local libraries
 #include "TrackingParameters.hpp"
+<<<<<<< HEAD
+=======
+#include "Dynamics.h"
+>>>>>>> origin/sharons_dynamics
 
 // Default camera width and height
 #define DEFAULT_CAM_WIDTH   640
 #define DEFAULT_CAM_HEIGHT  480
 
 // Filter methods (moved to parameter struct)
+<<<<<<< HEAD
 //#define USE_BACKGROUND_FILTER // Gaussian filter
 //#define USE_HSV_FILTER	  // HSV range filter
 //#define USE_MORPH_FILTER	// morphology (erosion and dilation) filter
 //#define USE_BLUR_FILTER	      // Gaussian blur
 //#define USE_HOUGH_DETECTION // uses HoughCircle detection, or contour detection if not
+=======
+#define USE_BACKGROUND_FILTER // Gaussian filter
+#define USE_HSV_FILTER	  // HSV range filter
+#define USE_MORPH_FILTER	// morphology (erosion and dilation) filter
+#define USE_BLUR_FILTER	      // Gaussian blur
+#define USE_HOUGH_DETECTION // uses HoughCircle detection, or contour detection if not
+>>>>>>> origin/sharons_dynamics
 
 /**
 	Slider callback data contains a pointer to the TrackingParameters instance,
@@ -125,7 +137,12 @@ class BallTracker {
 				'p' - Prints current tracking parameters to the console.
 		*/
         void run();
+<<<<<<< HEAD
     private:
+=======
+		void BallTracker::drawPredictedTrajectory(std::vector<cv::Point3d> points, int x, int y, Mat &frame);
+private:
+>>>>>>> origin/sharons_dynamics
         // Methods
         void initializeInterface();
         void drawBall(cv::Mat &frame, cv::Point2i center, int outerRadius,
@@ -167,19 +184,54 @@ class BallTracker {
         bool trackingEnabled;
         bool isRunning;
 		bool foundBall;
+		//s.r.
+		bool foundBallAgain;// needed for creating vector direction
 		cv::Point2i ballCenter;
+<<<<<<< HEAD
 		int ballRadius;
+=======
+		cv::Point2i ballCenterPrevTrack;//s.r.
+		int ballRadius;
+		int ballRadiusPrevTrack;//s.r.
+>>>>>>> origin/sharons_dynamics
         bool interfaceIsInitialized;
         bool videoIsPaused;
         int deviceNum;
 		unsigned int frameNumber;
+<<<<<<< HEAD
+=======
+		unsigned int frameNumberPrevTrack;//s.r.
+>>>>>>> origin/sharons_dynamics
         std::string fileName;
         cv::VideoCapture cap;
         CaptureType::Enum captureType;
         std::map<std::string, float> captureProperties;
         TrackingParameters *trackingParameters;
+<<<<<<< HEAD
 		cv::Ptr<cv::BackgroundSubtractor> backgroundSubtractor;
 		cv::Mat backgroundMask;
+=======
+#ifdef USE_BACKGROUND_FILTER
+		cv::Ptr<cv::BackgroundSubtractor> backgroundSubtractor;
+		cv::Mat backgroundMask;
+#endif
+		void BallTracker::SetIntrinsicMatrix();
+		std::vector<cv::Point3d> BallTracker::Generate3DPoints();
+
+
+		Dynamics * BallDynamics;
+		double ballVelocity;
+		double ballVerticalAngle;
+		double ballHorizontalAngle;
+		int diffBetweenTracks;
+		cv::Mat intrisicMat; // Intrisic matrix - (3, 3, cv::DataType<double>::type)
+		cv::Mat invert_intrisicMat; // Intrisic matrix - (3, 3, cv::DataType<double>::type)
+		cv::Mat rVec; // Rotation vector - (3, 1, cv::DataType<double>::type)
+		cv::Mat tVec; // Translation vector - (3, 1, cv::DataType<double>::type)
+		cv::Mat distCoeffs;   // Distortion vector - (5, 1, cv::DataType<double>::type)
+
+
+>>>>>>> origin/sharons_dynamics
 };
 
 #endif
